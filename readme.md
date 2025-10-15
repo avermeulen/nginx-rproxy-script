@@ -9,4 +9,4 @@ A tiny helper script to quickly **create, enable, disable** Nginx reverse proxie
 Install directly from GitHub:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<your-username>/nginx-rproxy-script/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/avermeulen/nginx-rproxy-script/main/install.sh | sudo bash
