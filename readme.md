@@ -19,41 +19,65 @@ curl -fsSL https://raw.githubusercontent.com/avermeulen/nginx-rproxy-script/main
 ### Create a new reverse proxy
 
 ```bash
-nginx-rproxy create --domain example.com --upstream 127.0.0.1:3000
+sudo rproxy create example.com 3000
 ```
 This will:
 - Create a new Nginx config for `example.com`
 - Set the upstream server to `127.0.0.1:3000`
+- Link the site to sites-enabled
 - Reload Nginx to apply changes
 
-### Enable an existing proxy
+### Link an existing proxy
 
 ```bash
-nginx-rproxy enable example.com
+sudo rproxy link example.com
 ```
-This enables the site and reloads Nginx.
+This enables the site by creating a symlink in sites-enabled and reloads Nginx.
 
-### Disable a proxy
+### Unlink a proxy
 
 ```bash
-nginx-rproxy disable example.com
+sudo rproxy unlink example.com
 ```
-Disables the site without deleting its configuration.
+Disables the site by removing the symlink from sites-enabled without deleting its configuration.
 
-### Remove a proxy
+### List all available sites
 
 ```bash
-nginx-rproxy remove example.com
+sudo rproxy list
 ```
-Deletes the Nginx config for the given domain and reloads Nginx.
+Lists all sites configured in `/etc/nginx/sites-available/`.
 
 ---
 
 ## 📝 Example Workflow
 
 ```bash
-nginx-rproxy create --domain app.mysite.com --upstream 10.0.0.2:8080
-nginx-rproxy enable app.mysite.com
+sudo rproxy create app.mysite.com 8080
+sudo rproxy list
+sudo rproxy unlink app.mysite.com
+sudo rproxy link app.mysite.com
+```
+
+---
+
+## 🔄 Updating
+
+To update rproxy to the latest version:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/avermeulen/nginx-rproxy-script/main/update.sh | sudo bash
+```
+
+This will:
+- Download the latest `rproxy.sh` from GitHub
+- Replace your existing installation at `/usr/local/bin/rproxy`
+- Make the script executable
+- Display a success message
+
+After updating, verify the installation with:
+```bash
+sudo rproxy list
 ```
 
 ---
@@ -79,7 +103,7 @@ nginx-rproxy enable app.mysite.com
 
 To remove the script:
 ```bash
-sudo rm /usr/local/bin/nginx-rproxy
+sudo rm /usr/local/bin/rproxy
 ```
 
 ---
