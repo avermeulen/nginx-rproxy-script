@@ -4,25 +4,40 @@
 #   sudo rproxy create <domain> <port>
 #   sudo rproxy link <domain>
 #   sudo rproxy unlink <domain>
+#   sudo rproxy list
 #
 # Example:
 #   sudo rproxy create example.com 3000
 #   sudo rproxy link example.com
 #   sudo rproxy unlink example.com
+#   sudo rproxy list
 
 set -e
 
 SITES_AVAILABLE="/etc/nginx/sites-available"
 SITES_ENABLED="/etc/nginx/sites-enabled"
 
-if [[ $EUID -ne 0 ]]; then
-   echo "Please run as root (use sudo)."
-   exit 1
-fi
-
 ACTION=$1
 DOMAIN=$2
 PORT=$3
+
+# Check if action is valid before requiring root
+case "$ACTION" in
+  create|link|unlink|list) ;;
+  *)
+    echo "Usage:"
+    echo "  sudo $0 create <domain> <port>"
+    echo "  sudo $0 link <domain>"
+    echo "  sudo $0 unlink <domain>"
+    echo "  sudo $0 list"
+    exit 1 ;;
+esac
+
+# Only require root for commands that modify configs
+if [[ "$ACTION" != "list" && $EUID -ne 0 ]]; then
+   echo "Please run as root (use sudo)."
+   exit 1
+fi
 
 create_site() {
     if [[ -z "$DOMAIN" || -z "$PORT" ]]; then
@@ -90,6 +105,19 @@ reload_nginx() {
     echo "✅ Nginx reloaded successfully."
 }
 
+list_sites() {
+    echo "📋 Available sites in $SITES_AVAILABLE:"
+    if [[ -d "$SITES_AVAILABLE" ]]; then
+        for conf in "$SITES_AVAILABLE"/*.conf; do
+            if [[ -f "$conf" ]]; then
+                basename "$conf" .conf
+            fi
+        done
+    else
+        echo "⚠️ Directory $SITES_AVAILABLE does not exist"
+    fi
+}
+
 case "$ACTION" in
   create) create_site ;;
   link)
@@ -98,10 +126,5 @@ case "$ACTION" in
   unlink)
     [[ -z "$DOMAIN" ]] && echo "Usage: sudo $0 unlink <domain>" && exit 1
     unlink_site ;;
-  *)
-    echo "Usage:"
-    echo "  sudo $0 create <domain> <port>"
-    echo "  sudo $0 link <domain>"
-    echo "  sudo $0 unlink <domain>"
-    exit 1 ;;
+  list) list_sites ;;
 esac
